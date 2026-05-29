@@ -1,5 +1,6 @@
 const userModel = require("./../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const registerValidator = require("./../validators/register");
 
 exports.register = async (req, res) => {
@@ -24,6 +25,12 @@ exports.register = async (req, res) => {
     password: hashedPassword,
     role: countOfUser > 0 ? "USER" : "ADMIN",
   });
+
+  const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1days",
+  });
+
+  return res.status(201).json({ user, accessToken });
 };
 
 exports.login = async (req, res) => {};
