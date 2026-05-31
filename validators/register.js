@@ -13,4 +13,4 @@ const schema = {
 
 const check = v.compile(schema);
 
-module.exports(check);
+module.exports = check;
