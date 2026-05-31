@@ -10,12 +10,14 @@ exports.register = async (req, res) => {
   }
 
   const { username, name, email, password, phone } = req.body;
-  const isUserExists = userModel.findOne({ $or: [{ username }, { email }] });
+  const isUserExists = await userModel.findOne({
+    $or: [{ username }, { email }],
+  });
   if (isUserExists) {
     res.status(409).json({ message: "This username or email already existed" });
   }
 
-  const countOfUser = await userModel.count();
+  const countOfUsers = await userModel.countDocuments();
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = userModel.create({
     email,
@@ -23,7 +25,7 @@ exports.register = async (req, res) => {
     name,
     phone,
     password: hashedPassword,
-    role: countOfUser > 0 ? "USER" : "ADMIN",
+    role: countOfUsers > 0 ? "USER" : "ADMIN",
   });
 
   const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
