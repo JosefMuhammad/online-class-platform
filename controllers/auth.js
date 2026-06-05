@@ -21,12 +21,9 @@ exports.register = async (req, res) => {
   const isUserBan = await banUserModel.find({ phone });
 
   if (isUserBan.length) {
-    return res
-      .status(409)
-      .json({
-        message:
-          "This phone is banned.You are not allowed to use this platform",
-      });
+    return res.status(409).json({
+      message: "This phone is banned.You are not allowed to use this platform",
+    });
   }
 
   const countOfUsers = await userModel.countDocuments();
@@ -47,6 +44,25 @@ exports.register = async (req, res) => {
   return res.status(201).json({ user, accessToken });
 };
 
-exports.login = async (req, res) => {};
+exports.login = async (req, res) => {
+  const { identifier, password } = req.body;
+  const user = await userModel.findOne({
+    $or: [{ email: identifier }, { username: identifier }],
+  });
+
+  if (!user) {
+    return res.status(401).json({ message: "Invalid username or email!" });
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(401).json({ message: "Invalid Password!" });
+  }
+
+  const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "30 days",
+  });
+  return res.json({ accessToken });
+};
 
 exports.getMe = async (req, res) => {};
