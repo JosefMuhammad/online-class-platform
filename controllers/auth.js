@@ -2,6 +2,7 @@ const userModel = require("./../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const registerValidator = require("./../validators/register");
+const banUserModel = require("./../models/ban-user");
 
 exports.register = async (req, res) => {
   const validationResult = registerValidator(req.body);
@@ -15,6 +16,17 @@ exports.register = async (req, res) => {
   });
   if (isUserExists) {
     res.status(409).json({ message: "This username or email already existed" });
+  }
+
+  const isUserBan = await banUserModel.find({ phone });
+
+  if (isUserBan.length) {
+    return res
+      .status(409)
+      .json({
+        message:
+          "This phone is banned.You are not allowed to use this platform",
+      });
   }
 
   const countOfUsers = await userModel.countDocuments();
