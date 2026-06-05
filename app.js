@@ -5,6 +5,7 @@ const authRouter = require("./routes/auth");
 const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
+const usersRouter = require("./routes/user");
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,5 +15,6 @@ app.use(
   express.static(path.join(__dirname, "public", "courses", "covers")),
 );
 app.use("/auth", authRouter);
+app.use("/user", usersRouter);
 
 module.exports = app;
